@@ -1,0 +1,8 @@
+
+
+.error {
+    color: var(--color-negative);
+    font-size: var(--ye-font-size-small);
+    width: var(--full-size);
+    text-align: right;
+}

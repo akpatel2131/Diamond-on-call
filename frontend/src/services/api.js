@@ -1,6 +1,9 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_BASE = 'http://localhost:5001/api';
+// eslint-disable-next-line no-undef
+const API_BASE = process.env.REACT_APP_API_ENDPOINT || "";
+
+console.log({ API_BASE });
 
 export const getProducts = async () => {
   return axios.get(`${API_BASE}/products`);
@@ -10,6 +13,6 @@ export const purchaseProduct = async (productData) => {
   return axios.post(`${API_BASE}/purchase`, productData);
 };
 
-export const checkoutSale = async (productId, quantity, discount) => {
-  return axios.post(`${API_BASE}/sales/checkout`, { productId, quantity, discount });
+export const checkoutSale = async (productData, discount) => {
+  return axios.post(`${API_BASE}/sales/checkout`, { productData, discount });
 };

@@ -23,6 +23,7 @@
   --ye-width-tiny: 50px;
   --ye-width-xsmall: 100px;
   --ye-width-small: 150px;
+  --ye-width-medium: 250px;
   --ye-width-normal: 300px;
   --ye-width-large: 350px;
   --ye-width-huge: 500px;
@@ -69,13 +70,16 @@
   --color-ink: #000;
   --color-grey: #9ca3a8;
   --color-grey-l1: #c2c4c7;
+  --color-light-grey: #f4f4f4;
+  --color-primary: #007bff;
+  --color-negative: #dc2626;
   
   font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
+  background-color: var(--color-light-grey);
   min-height: 100vh;
 }
 
-.container {
+.container { 
   padding: 1rem;
 }
 
@@ -83,12 +87,18 @@
 .productSection {
   display: grid;
   grid-template-columns: 5fr 1fr;
-  gap: 24px;
+  gap: var(--ye-spacing-rem-xlarge);
 }
 
 .purchaseSaleSection {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--ye-spacing-em-xlarge);
+}
+
+@media only screen and (max-width: 600px) {
+  .productSection {
+    grid-template-columns: 1fr;
+  }
 }
 

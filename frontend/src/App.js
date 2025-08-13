@@ -1,28 +1,38 @@
-import React, { useState, useEffect } from "react";
-import MessageAlert from "./components/MessageAlert/MessageAlert";
-import Dashboard from "./pages/Dashboard";
-import Purchase from "./pages/Purchase";
-import Sale from "./pages/Sale";
-import { getProducts, purchaseProduct, checkoutSale } from "./services/api";
+import React from "react";
+import Dashboard from "./components/Dashboard/Dashboard";
+import Purchase from "./components/Purchase/Purchase";
+import Sale from "./components/Sale/Sale";
 import styles from "./app.module.css";
 import { ProductProvider, useProductContext } from "./context/productContext";
+import CheckoutModal from "./uiComponents/CheckoutModal/CheckoutModal";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
 
 function HomeSection() {
-  const { error, success } = useProductContext();
+  const { checkoutModalMeesage, setCheckoutModalMeesage } =
+    useProductContext();
   return (
     <div className={styles.app}>
       <div className={styles.container}>
-        <h1>Inventory Sale System</h1>
-        <MessageAlert type="error" message={error} />
-        <MessageAlert type="success" message={success} />
+        <h1>E Purchase</h1>
+        <h2>Product Dashboard</h2>
         <div className={styles.productSection}>
           <Dashboard />
           <div className={styles.purchaseSaleSection}>
             <Purchase />
-            {/* <Sale /> */}
+            <Sale />
           </div>
         </div>
       </div>
+      <CheckoutModal
+        show={!!checkoutModalMeesage}
+        onClose={() => setCheckoutModalMeesage("")}
+        message={checkoutModalMeesage}
+      />
+      <ToastContainer
+        closeButton={false}
+        closeOnClick
+      />
     </div>
   );
 }

@@ -6,29 +6,30 @@ import {
   useState,
 } from "react";
 import React from "react";
-import { getProducts, purchaseProduct } from "../services/api";
-import { useAsyncFn, useEffectOnce } from "react-use";
+import { getProducts, purchaseProduct, checkoutSale } from "../services/api";
+import { useAsyncFn, useAsyncRetry, useEffectOnce } from "react-use";
+import { toast } from "react-toastify";
 
+const AUTO_CLOSE_TIME = 5000;
 export const ProductContext = createContext();
 
 export const ProductProvider = ({ children }) => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [purchaseItem, setPurchaseItem] = useState([]);
   const [saleItem, setSaleItem] = useState([]);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [checkoutModalMeesage, setCheckoutModalMeesage] = useState("");
 
-  const fetchProducts = useCallback(async () => {
-    setLoading(true);
-    setError("");
+  const {
+    loading: productListLoading,
+    retry: fetchProducts,
+    value: products,
+  } = useAsyncRetry(async () => {
     try {
-      const res = await getProducts();
-      setProducts(res.data.data);
-    } catch {
-      setError("Failed to fetch products");
-    } finally {
-      setLoading(false);
+      const data = await getProducts();
+      return data.data.data;
+    } catch (error) {
+      toast.error(error.response.data.message, {
+        autoClose: AUTO_CLOSE_TIME,
+      });
     }
   }, [getProducts]);
 
@@ -37,64 +38,72 @@ export const ProductProvider = ({ children }) => {
       try {
         const res = await purchaseProduct(purchaseItem);
         if (res.data.success) {
-          setSuccess("Purchase successful!");
           await fetchProducts();
           setPurchaseItem([]);
+          setCheckoutModalMeesage(
+            `Product purchased successfully! Please check your email for the receipt.`
+          );
         } else {
-          setError(res.data.message);
+          toast.error(res.data.message, {
+            autoClose: AUTO_CLOSE_TIME,
+          });
         }
-      } catch {
-        setError("Purchase failed");
+      } catch (error) {
+        toast.error(error.response.data.message, {
+          autoClose: AUTO_CLOSE_TIME,
+        });
       }
     }, [purchaseItem, fetchProducts]);
 
-  // const handleSale = async () => {
-  //   try {
-  //     const res = await checkoutSale(
-  //       saleForm.productId,
-  //       parseInt(saleForm.quantity),
-  //       parseFloat(saleForm.discount)
-  //     );
-  //     if (res.data.success) {
-  //       setSuccess("Sale completed!");
-  //       fetchProducts();
-  //       setSaleForm({ productId: "", quantity: "", discount: 10 });
-  //     } else {
-  //       setError(res.data.message);
-  //     }
-  //   } catch {
-  //     setError("Sale failed");
-  //   }
-  // };
-
-  useEffectOnce(() => {
-    fetchProducts();
-  });
+  const [{ loading: saleLoading }, handleSale] = useAsyncFn(
+    async (discount) => {
+      try {
+        const res = await checkoutSale(saleItem, discount);
+        if (res.data.success) {
+          await fetchProducts();
+          setSaleItem([]);
+          setCheckoutModalMeesage(
+            `Product sold successfully! Please check your email for the receipt.`
+          );
+        } else {
+          toast.error(res.data.message, {
+            autoClose: AUTO_CLOSE_TIME,
+          });
+        }
+      } catch (error) {
+        toast.error(error.response.data.message, {
+          autoClose: AUTO_CLOSE_TIME,
+        });
+      }
+    },
+    [saleItem, fetchProducts]
+  );
 
   const value = useMemo(() => {
     return {
       products,
-      fetchProducts,
-      loading,
+      productListLoading,
       purchaseItem,
       setPurchaseItem,
       saleItem,
       setSaleItem,
-      error,
-      success,
       handlePurchase,
       purchaseLoading,
+      handleSale,
+      saleLoading,
+      checkoutModalMeesage,
+      setCheckoutModalMeesage,
     };
   }, [
     products,
-    fetchProducts,
-    loading,
+    productListLoading,
     purchaseItem,
     saleItem,
-    error,
-    success,
     handlePurchase,
-    purchaseLoading
+    purchaseLoading,
+    handleSale,
+    saleLoading,
+    checkoutModalMeesage,
   ]);
 
   return (

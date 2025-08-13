@@ -13,12 +13,17 @@ const getProducts = (req, res) => {
 const purchaseProduct = (req, res) => {
   try {
     const productData = req.body;
-    const product = productData.map((item) => productService.increaseStock(item.id, parseInt(item.quantity)));
+    const products = productData.map((item) => productService.increaseStock(item.id, parseInt(item.quantity)));
 
-    res.status(200).json({
+    const totalCost = productData.reduce((total, item) => total + item.price * item.quantity, 0);
+
+    res.status(201).json({
       success: true,
       message: 'Purchase successful',
-      data: product
+      data: {
+        products,
+        totalCost
+      }
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Purchase failed', error: err.message });
@@ -27,27 +32,22 @@ const purchaseProduct = (req, res) => {
 
 const checkoutSale = (req, res) => {
   try {
-    const { productId, quantity, discount = 0 } = req.body;
-    if (!productId || !quantity || quantity <= 0) {
-      return res.status(400).json({ success: false, message: 'Product ID and valid quantity are required' });
-    }
-    if (discount < 0 || discount > 100) {
-      return res.status(400).json({ success: false, message: 'Discount must be between 0 and 100' });
-    }
+    const {productData, discount} = req.body;
 
-    const product = productService.findProductById(productId);
-    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+    const products = productData.map((item) => productService.decreaseStock(item.id, parseInt(item.quantity)));
 
-    const updatedProduct = productService.decreaseStock(productId, parseInt(quantity));
-    if (updatedProduct === false) {
-      return res.status(400).json({ success: false, message: `Insufficient stock. Available: ${product.stock}` });
+    if (products.includes(false)) {
+      return res.status(400).json({ success: false, message: `Insufficient stock` });
     }
 
-    const prices = productService.calculateSalePrice(product, quantity, discount);
-    res.status(200).json({
+    const sellPrices = productData.map((item) => productService.calculateSalePrice(item, parseInt(item.quantity), discount));
+    res.status(201).json({
       success: true,
       message: 'Sale completed successfully',
-      data: { product, quantity, ...prices, discount: `${discount}%`, updatedStock: product.stock }
+      data: { 
+        products,
+        sellPrices
+       }
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Sale checkout failed', error: err.message });

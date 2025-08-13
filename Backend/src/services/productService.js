@@ -3,7 +3,6 @@ const path = require('path');
 
 const PRODUCTS_FILE = path.join(__dirname, '../data/products.json');
 
-// Helper: Read products from file
 const readProductsFromFile = () => {
   try {
     if (!fs.existsSync(PRODUCTS_FILE)) {
@@ -17,7 +16,6 @@ const readProductsFromFile = () => {
   }
 };
 
-// Helper: Write products to file
 const writeProductsToFile = (products) => {
   try {
     fs.writeFileSync(PRODUCTS_FILE, JSON.stringify(products, null, 2));
@@ -26,19 +24,13 @@ const writeProductsToFile = (products) => {
   }
 };
 
-// CRUD operations
 const getAllProducts = () => {
   return readProductsFromFile();
 };
 
-const findProductById = (id) => {
-  const products = readProductsFromFile();
-  return products.find(p => p.id === id);
-};
-
 const increaseStock = (productId, quantity) => {
   const products = readProductsFromFile();
-  const product = products.find(p => p.id === productId);
+  const product = products.find(p => Number(p.id) === Number(productId));
   if (!product) return null;
   product.stock += quantity;
   writeProductsToFile(products);
@@ -47,7 +39,7 @@ const increaseStock = (productId, quantity) => {
 
 const decreaseStock = (productId, quantity) => {
   const products = readProductsFromFile();
-  const product = products.find(p => p.id === productId);
+  const product = products.find(p => Number(p.id) === Number(productId));
   if (!product) return null;
   if (product.stock < quantity) return false;
   product.stock -= quantity;
@@ -67,7 +59,6 @@ const calculateSalePrice = (product, quantity, discount) => {
 
 module.exports = {
   getAllProducts,
-  findProductById,
   increaseStock,
   decreaseStock,
   calculateSalePrice

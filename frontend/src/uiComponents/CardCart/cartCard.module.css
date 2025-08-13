@@ -1,0 +1,36 @@
+
+.purchaseItems {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ye-spacing-rem-xsmall);
+  }
+  
+  .itemHeader,
+  .quantityContainer {
+    display: flex;
+    justify-content: space-between;
+    text-transform: capitalize;
+    align-items: center;
+  }
+  
+  .quantityContainer {
+    justify-content: flex-end;
+    gap: var(--ye-spacing-rem-xsmall);
+    font-weight: var(--ye-font-weight-normal);
+  }
+  
+  .itemName {
+    font-weight: var(--ye-font-weight-bold);
+    font-size: var(--ye-font-size-normal);
+  }
+  
+  .itemQuantity {
+    font-weight: var(--ye-font-weight-semibold);
+  }
+  
+  .input {
+    padding: var(--ye-spacing-rem-xsmall);
+    border-radius: var(--ye-radius-normal);
+    border: 1px solid var(--color-grey);
+    width: var(--full-size);
+  }
