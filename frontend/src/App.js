@@ -19,7 +19,7 @@ function HomeSection() {
           <Dashboard />
           <div className={styles.purchaseSaleSection}>
             <Purchase />
-            <Sale />
+            {/* <Sale /> */}
           </div>
         </div>
       </div>

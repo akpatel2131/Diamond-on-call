@@ -1,9 +1,40 @@
-import React from "react";
+import React, { useCallback } from "react";
 import styles from "./dashboard.module.css";
 import { useProductContext } from "../context/productContext";
 
 const Dashboard = () => {
-  const {loading, products} = useProductContext();
+  const {
+    loading,
+    products,
+    setPurchaseItem,
+    setSaleItem,
+    purchaseItem,
+    saleItem,
+  } = useProductContext();
+
+  const handlePurchaseOrSell = useCallback(
+    (product, data, setData) => {
+      const isProductAlreadyInPurchase = data.find(
+        (item) => item.id === product.id
+      );
+      if (isProductAlreadyInPurchase) {
+        const updatedPurchaseItem = data.map((item) => {
+          if (item.id === product.id) {
+            return { ...item, quantity: item.quantity + 1 };
+          }
+          return item;
+        });
+        setData(updatedPurchaseItem);
+      } else {
+        setData((previous) => [...previous, {
+          ...product,
+          quantity: 1
+        }]);
+      }
+    },
+    []
+  );
+
   return (
     <div>
       <h2>Product Dashboard</h2>
@@ -26,8 +57,18 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className={styles.buttonContainer}>
-                <button className={styles.button}>Purchase</button>
-                <button className={styles.button}>Sale</button>
+                <button
+                  className={styles.button}
+                  onClick={() => handlePurchaseOrSell(product, purchaseItem, setPurchaseItem)}
+                >
+                  Purchase
+                </button>
+                <button
+                  className={styles.button}
+                  onClick={() => handlePurchaseOrSell(product, saleItem, setSaleItem)}
+                >
+                  Sale
+                </button>
               </div>
             </div>
           ))}

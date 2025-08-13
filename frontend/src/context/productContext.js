@@ -6,8 +6,8 @@ import {
   useState,
 } from "react";
 import React from "react";
-import { getProducts } from "../services/api";
-import { useEffectOnce } from "react-use";
+import { getProducts, purchaseProduct } from "../services/api";
+import { useAsyncFn, useEffectOnce } from "react-use";
 
 export const ProductContext = createContext();
 
@@ -32,23 +32,21 @@ export const ProductProvider = ({ children }) => {
     }
   }, [getProducts]);
 
-  // const handlePurchase = async () => {
-  //   try {
-  //     const res = await purchaseProduct(
-  //       purchaseForm.productId,
-  //       parseInt(purchaseForm.quantity)
-  //     );
-  //     if (res.data.success) {
-  //       setSuccess("Purchase successful!");
-  //       fetchProducts();
-  //       setPurchaseForm({ productId: "", quantity: "" });
-  //     } else {
-  //       setError(res.data.message);
-  //     }
-  //   } catch {
-  //     setError("Purchase failed");
-  //   }
-  // };
+  const [{ loading: purchaseLoading }, handlePurchase] =
+    useAsyncFn(async () => {
+      try {
+        const res = await purchaseProduct(purchaseItem);
+        if (res.data.success) {
+          setSuccess("Purchase successful!");
+          await fetchProducts();
+          setPurchaseItem([]);
+        } else {
+          setError(res.data.message);
+        }
+      } catch {
+        setError("Purchase failed");
+      }
+    }, [purchaseItem, fetchProducts]);
 
   // const handleSale = async () => {
   //   try {
@@ -84,6 +82,8 @@ export const ProductProvider = ({ children }) => {
       setSaleItem,
       error,
       success,
+      handlePurchase,
+      purchaseLoading,
     };
   }, [
     products,
@@ -93,6 +93,8 @@ export const ProductProvider = ({ children }) => {
     saleItem,
     error,
     success,
+    handlePurchase,
+    purchaseLoading
   ]);
 
   return (

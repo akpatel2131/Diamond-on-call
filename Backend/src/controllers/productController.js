@@ -12,19 +12,13 @@ const getProducts = (req, res) => {
 
 const purchaseProduct = (req, res) => {
   try {
-    const { productId, quantity } = req.body;
-    if (!productId || !quantity || quantity <= 0) {
-      return res.status(400).json({ success: false, message: 'Product ID and valid quantity are required' });
-    }
+    const productData = req.body;
+    const product = productData.map((item) => productService.increaseStock(item.id, parseInt(item.quantity)));
 
-    const product = productService.increaseStock(productId, parseInt(quantity));
-    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
-
-    const totalCost = product.price * quantity;
     res.status(200).json({
       success: true,
       message: 'Purchase successful',
-      data: { product, quantity, totalCost, updatedStock: product.stock }
+      data: product
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Purchase failed', error: err.message });

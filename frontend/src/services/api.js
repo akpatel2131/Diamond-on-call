@@ -6,8 +6,8 @@ export const getProducts = async () => {
   return axios.get(`${API_BASE}/products`);
 };
 
-export const purchaseProduct = async (productId, quantity) => {
-  return axios.post(`${API_BASE}/purchase`, { productId, quantity });
+export const purchaseProduct = async (productData) => {
+  return axios.post(`${API_BASE}/purchase`, productData);
 };
 
 export const checkoutSale = async (productId, quantity, discount) => {
