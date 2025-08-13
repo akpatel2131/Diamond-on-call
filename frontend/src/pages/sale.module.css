@@ -1,0 +1,20 @@
+.saleForm {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+  
+  .discount {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .summary {
+    margin-top: 1rem;
+    padding: 0.8rem;
+    background: #fafafa;
+    border-radius: 4px;
+    border: 1px solid #eee;
+  }
+  
