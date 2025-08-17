@@ -16,62 +16,46 @@ export const TotalCost = ({ cost }) => {
 };
 
 const Purchase = () => {
-  const { purchaseItem, setPurchaseItem, handlePurchase, purchaseLoading } =
+  const { purchaseItem, handlePurchase, purchaseLoading, handlePurchaseCart, purchaseCartLoading, handleDeleteCart } =
     useProductContext();
 
   const handleUpdateQuantity = useCallback(
-    (value, productId) => {
-      let updatedData;
-      if (value === null) {
-        updatedData = purchaseItem.filter((item) => item.id !== productId);
-      } else {
-        updatedData = purchaseItem.map((item) => {
-          if (item.id === productId) {
-            return {
-              ...item,
-              quantity: value,
-            };
-          }
-          return item;
-        });
-      }
-      setPurchaseItem(updatedData);
+    (productData) => {
+      handlePurchaseCart(productData);
     },
-    [purchaseItem]
+    [handlePurchaseCart]
   );
 
-  const totalCost = useCallback(() => {
-    return purchaseItem.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0
-    );
-  }, [purchaseItem]);
-
-  const disabled = useMemo(() => {
-    const quantityNotExist = purchaseItem.some((item) => !item.quantity);
-    return purchaseLoading || purchaseItem.length === 0 || quantityNotExist;
-  }, [purchaseItem]);
-
+  if(purchaseCartLoading) {
+    return <div>...loading</div>
+  }
   return (
     <div className={styles.purchaseForm}>
       <h2 className={styles.header}>Purchase Inventory</h2>
       <Divider />
 
-      {purchaseItem.length > 0 ? (
+      {purchaseItem.products?.length > 0 ? (
         <>
           <div className={styles.addedItemsContainer}>
-            {purchaseItem.map((item, index) => (
+            {purchaseItem.products?.map((item, index) => (
               <>
                 <CartProductCard
                   data={item}
                   index={index}
-                  handleUpdateQuantity={handleUpdateQuantity}
+                  handleUpdateQuantity={(quantity) => {
+                    const data = {
+                      ...item,
+                      quantity,
+                    }
+                    handleUpdateQuantity(data);
+                  }}
+                  onDelete={() => handleDeleteCart("purchase", item.id)}
                 />
                 <Divider />
               </>
             ))}
           </div>
-          <TotalCost cost={totalCost()} />
+          <TotalCost cost={purchaseItem.totalCost} />
         </>
       ) : (
         <EmptyData />
@@ -79,7 +63,6 @@ const Purchase = () => {
 
       <Button
         onClick={handlePurchase}
-        disabled={disabled}
       >
         {purchaseLoading ? "Processing..." : "Complete Purchase"}
       </Button>

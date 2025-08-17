@@ -1,27 +1,21 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
+const appError = require("../utils/appError");
 
-const PRODUCTS_FILE = path.join(__dirname, '../data/products.json');
+const PRODUCTS_FILE = path.join(__dirname, "../data/products.json");
+const PURCHASE_FILE = path.join(__dirname, "../data/purchaseCart.json");
+const SELL_FILE = path.join(__dirname, "../data/sellCart.json");
 
 const readProductsFromFile = () => {
-  try {
-    if (!fs.existsSync(PRODUCTS_FILE)) {
-      fs.writeFileSync(PRODUCTS_FILE, JSON.stringify([], null, 2));
-    }
-    const data = fs.readFileSync(PRODUCTS_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch (err) {
-    console.error('Error reading products file:', err);
-    return [];
+  if (!fs.existsSync(PRODUCTS_FILE)) {
+    fs.writeFileSync(PRODUCTS_FILE, JSON.stringify([], null, 2));
   }
+  const data = fs.readFileSync(PRODUCTS_FILE, "utf-8");
+  return JSON.parse(data);
 };
 
-const writeProductsToFile = (products) => {
-  try {
-    fs.writeFileSync(PRODUCTS_FILE, JSON.stringify(products, null, 2));
-  } catch (err) {
-    console.error('Error writing products file:', err);
-  }
+const writeProductsToFile = (file, products) => {
+  fs.writeFileSync(file, JSON.stringify(products, null, 2));
 };
 
 const getAllProducts = () => {
@@ -30,37 +24,47 @@ const getAllProducts = () => {
 
 const increaseStock = (productId, quantity) => {
   const products = readProductsFromFile();
-  const product = products.find(p => Number(p.id) === Number(productId));
-  if (!product) return null;
+  console.log("print product")
+  const product = products.find((p) => Number(p.id) === Number(productId));
+  console.log({product})
+  if (!product) throw appError("Product not found", 404);
   product.stock += quantity;
-  writeProductsToFile(products);
+  console.log("print product 2")
+  writeProductsToFile(PRODUCTS_FILE, products);
+  console.log("print product 3")
+  writeProductsToFile(PURCHASE_FILE, []);
+  console.log("print product 4")
   return product;
 };
 
 const decreaseStock = (productId, quantity) => {
   const products = readProductsFromFile();
-  const product = products.find(p => Number(p.id) === Number(productId));
-  if (!product) return null;
-  if (product.stock < quantity) return false;
+  const product = products.find((p) => Number(p.id) === Number(productId));
+  if (!product) throw appError("Product not found", 404);
+  if (product.stock < quantity) throw appError("Not enough stock", 400);
   product.stock -= quantity;
-  writeProductsToFile(products);
+  writeProductsToFile(PRODUCTS_FILE, products);
+  writeProductsToFile(SELL_FILE, []);
   return product;
 };
 
 const calculateSalePrice = (product, quantity, discount) => {
-  const basePrice = product.price * quantity;
-  const markup = 0.20;
-  const priceWithMarkup = basePrice * (1 + markup);
-  const discountAmount = (priceWithMarkup * discount) / 100;
-  const finalPrice = priceWithMarkup - discountAmount;
+  try {
+    const basePrice = product.price * quantity;
+    const markup = 0.2;
+    const priceWithMarkup = basePrice * (1 + markup);
+    const discountAmount = (priceWithMarkup * discount) / 100;
+    const finalPrice = priceWithMarkup - discountAmount;
 
-  return { basePrice, markup, priceWithMarkup, discountAmount, finalPrice };
+    return { basePrice, markup, priceWithMarkup, discountAmount, finalPrice };
+  } catch (error) {
+    throw appError(error, 500);
+  }
 };
 
 module.exports = {
   getAllProducts,
   increaseStock,
   decreaseStock,
-  calculateSalePrice
+  calculateSalePrice,
 };
-  

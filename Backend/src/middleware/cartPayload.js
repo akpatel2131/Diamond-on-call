@@ -1,23 +1,23 @@
-const Joi = require('joi');
+const Joi = require("joi");
 const { errorMessage } = require("../utils/message");
 
-const purchaseSchema = Joi.array().items(
-  Joi.object({
+const cartSchema = Joi.object({
     id: Joi.number().required("product Id is missing"),
     name: Joi.string().required("Product name is missing"),
     price: Joi.number().required("Product price is missing"),
     quantity: Joi.number().required("Product quantity is missing"),
     stock: Joi.number().required("Product stock is missing"),
-  })
-);
+  });
 
-const validatePurchasePayload = (req, res, next) => {
-  const { error, value } = purchaseSchema.validate(req.body);
+const validateCartPayload = (req, res, next) => {
+  const { error, value } = cartSchema.validate(req.body);
   if (error) {
-    return res.status(400).json(errorMessage(error.details[0].message));
+    return res
+      .status(400)
+      .json(errorMessage(error.details[0].message));
   }
   req.body = value;
   next();
 };
 
-module.exports = validatePurchasePayload;
+module.exports = validateCartPayload;

@@ -4,7 +4,9 @@ import React from "react";
 import Button from "../Button/Button";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
-const CartProductCard = ({ data, index, handleUpdateQuantity }) => {
+const CartProductCard = ({ data, index, handleUpdateQuantity, onDelete }) => {
+  const [inputValue, setInputValue] = React.useState(data.quantity);
+
   return (
     <div key={index} className={styles.purchaseItems}>
       <div className={styles.itemHeader}>
@@ -18,14 +20,17 @@ const CartProductCard = ({ data, index, handleUpdateQuantity }) => {
           type="number"
           min="1"
           placeholder="Enter quantity"
-          onChange={(event) => {
-            handleUpdateQuantity(toNumber(event.target.value), data.id);
+          onChange={(event) => setInputValue(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && inputValue > 0) {
+              handleUpdateQuantity(inputValue);
+            }
           }}
-          value={toNumber(data.quantity) || ""}
+          value={inputValue || ""}
         />
       </div>
-      {!data.quantity && <ErrorMessage message={"Please enter quantity"} />}
-      <Button variant="negative" onClick={() => handleUpdateQuantity(null, data.id)}>
+      {!inputValue && <ErrorMessage message={"Please enter quantity"} />}
+      <Button variant="negative" onClick={() => onDelete()}>
         Delete
       </Button>
     </div>
